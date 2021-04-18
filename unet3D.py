@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 import torch.nn as nn
-input_shape = (1,4,160,160,16)
+# input_shape = (1,4,160,160,16)
 
 class Unet(nn.Module):
     def __init__(self):
@@ -58,10 +58,27 @@ class Unet(nn.Module):
 
         return x
 
+import numpy as np
+from numpy.lib import stride_tricks
+
+def cutup(data, blck, strd):
+    sh = np.array(data.shape)
+    blck = np.asanyarray(blck)
+    strd = np.asanyarray(strd)
+    nbl = (sh - blck) // strd + 1
+    strides = np.r_[data.strides * strd, data.strides]
+    dims = np.r_[nbl, blck]
+    data6 = stride_tricks.as_strided(data, strides=strides, shape=dims)
+    return data6#.reshape(-1, *blck)
+
 def test():
-    y = torch.randn(1,4,160,160,16).cuda()
-    net = Unet().cuda()
-    x = net.forward(y)
+    # y = torch.randn(4,160,160,16).cuda()
+    # net = Unet().cuda()
+    # x = net.forward(y)
+
+    # print((torch.unsqueeze(y,0)).shape)
+    y = torch.randn(240, 240, 155).numpy()
+    x = cutup(y, (160, 160, 16), (1, 1, 1))
     print(x.shape)
 
 test()
